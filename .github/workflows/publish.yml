@@ -50,7 +50,32 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Smoke test (amd64)
+      - name: Verify skills are baked in (no host mount)
+        run: |
+          SKILLS_DIR=/root/.pi/agent/skills
+          for skill in diagnose grill-with-docs improve-codebase-architecture prototype setup-matt-pocock-skills tdd to-issues to-prd triage zoom-out; do
+            docker run --rm --platform linux/amd64 --entrypoint bash ${{ steps.meta.outputs.tags }} \
+              -c "test -d $SKILLS_DIR/\$skill && test -f $SKILLS_DIR/\$skill/SKILL.md && echo '  ✓ '\$skill"
+          done
+          echo "All 10 engineering skills verified."
+
+      - name: Smoke test pi agent skill awareness (requires PI_TEST_API_KEY secret)
+        if: ${{ secrets.PI_TEST_API_KEY }}
+        run: |
+          docker run --rm --platform linux/amd64 \
+            -e ANTHROPIC_API_KEY=${{ secrets.PI_TEST_API_KEY }} \
+            ${{ steps.meta.outputs.tags }} \
+            -p "List ALL skills you see available. Reply with a plain list." \
+            2>&1 | tee /tmp/pi-skills-output.txt
+          echo "Checking output contains engineering skills..."
+          count=$(grep -oiE "diagnose|grill-with-docs|improve-codebase-architecture|prototype|tdd|to-issues|to-prd|triage|zoom-out" /tmp/pi-skills-output.txt | sort -u | wc -l || true)
+          if [ "$count" -lt 5 ]; then
+            echo "FAIL: only $count engineering skills detected"
+            exit 1
+          fi
+          echo "OK: $count engineering skill mentions found"
+
+      - name: Extensions and CLI smoke test (amd64)
         run: |
           docker run --rm --platform linux/amd64 --entrypoint sd ${{ steps.meta.outputs.tags }} --help
           docker run --rm --platform linux/amd64 --entrypoint pi ${{ steps.meta.outputs.tags }} list
