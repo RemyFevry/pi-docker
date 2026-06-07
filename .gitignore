@@ -1,0 +1,12 @@
+# Git
+.git/
+
+# Docker
+*.tar
+
+# Local dev clones (not used by Docker build)
+inspect/
+search-codebase/
+
+# macOS
+.DS_Store

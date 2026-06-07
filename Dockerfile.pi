@@ -1,0 +1,30 @@
+FROM node:24-bookworm-slim
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends bash build-essential ca-certificates curl git ripgrep \
+  && rm -rf /var/lib/apt/lists/*
+RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN cargo install --git https://github.com/rtk-ai/rtk
+
+# Install pi extensions from npm
+RUN pi install npm:pi-subagents
+RUN pi install npm:pi-web-access
+
+# Install session-inspector extension (https://github.com/RemyFevry/pi-session-inspector)
+RUN git clone --depth 1 https://github.com/RemyFevry/pi-session-inspector.git \
+    /root/.pi/agent/extensions/session-inspector
+
+# Build and install sonde CLI (https://github.com/RemyFevry/sonde)
+RUN git clone --depth 1 https://github.com/RemyFevry/sonde.git /tmp/sonde \
+  && cargo install --path /tmp/sonde \
+  && rm -rf /tmp/sonde
+
+RUN rtk init -g --agent pi
+
+# Install Matt Pocock's engineering skills (https://github.com/mattpocock/skills)
+RUN npx skills@latest add mattpocock/skills -g -a pi -s '*' -y --copy
+
+WORKDIR /workspace
+ENTRYPOINT ["pi"]
