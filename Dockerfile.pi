@@ -25,7 +25,9 @@ RUN rtk init -g --agent pi
 
 # Install Matt Pocock's engineering skills (https://github.com/mattpocock/skills)
 RUN npx skills@latest add mattpocock/skills -g -a pi \
-    -s '{diagnose,grill-with-docs,improve-codebase-architecture,prototype,setup-matt-pocock-skills,tdd,to-issues,to-prd,triage,zoom-out}' \
+    -s diagnose -s grill-with-docs -s improve-codebase-architecture \
+    -s prototype -s setup-matt-pocock-skills -s tdd \
+    -s to-issues -s to-prd -s triage -s zoom-out \
     -y --copy
 
 WORKDIR /workspace
