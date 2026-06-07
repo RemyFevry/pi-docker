@@ -71,6 +71,31 @@ docker run --rm --entrypoint pi pi-docker list          # extensions registered
 docker run --rm --entrypoint ls pi-docker /root/.pi/agent/extensions/  # session-inspector, rtk
 ```
 
+The Dockerfile also runs these checks at build time — a component that fails verification breaks the build.
+
+### Releasing
+
+Push a git tag to trigger a multi-arch build and publish to GHCR:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The GitHub Actions workflow (`.github/workflows/publish.yml`) builds `linux/amd64` and `linux/arm64` via QEMU, pushes to `ghcr.io/remyfevry/pi-docker`, and runs a post-build smoke test.
+
+Tags follow semver: `v1.2.3` publishes `:v1.2.3` and `:v1.2`.
+
+### Pull and run
+
+```bash
+docker pull ghcr.io/remyfevry/pi-docker:v0.1.0
+docker run -it --rm \
+  -e GEMINI_API_KEY=$GEMINI_API_KEY \
+  -v $(pwd):/workspace \
+  ghcr.io/remyfevry/pi-docker:v0.1.0
+```
+
 ## Project structure
 
 ```
