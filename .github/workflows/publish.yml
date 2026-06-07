@@ -60,6 +60,25 @@ jobs:
           done
           echo "All 10 engineering skills verified."
 
+      - name: Smoke test pi agent skill awareness (optional, needs PI_TEST_API_KEY secret)
+        env:
+          PI_KEY: ${{ secrets.PI_TEST_API_KEY }}
+        if: env.PI_KEY
+        run: |
+          TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -1)
+          docker run --rm --platform linux/amd64 \
+            -e ANTHROPIC_API_KEY="$PI_KEY" \
+            "$TAG" \
+            -p "List ALL skills you see available. Reply with a plain list." \
+            2>&1 | tee /tmp/pi-skills-output.txt
+          echo "Checking output contains at least 5 engineering skills..."
+          count=$(grep -oiE "diagnose|grill-with-docs|improve-codebase-architecture|prototype|tdd|to-issues|to-prd|triage|zoom-out" /tmp/pi-skills-output.txt | sort -u | wc -l)
+          if [ "$count" -lt 5 ]; then
+            echo "FAIL: only $count engineering skills detected"
+            exit 1
+          fi
+          echo "OK: $count unique engineering skill mentions found"
+
       - name: Extensions and CLI smoke test (amd64)
         run: |
           TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -1)
