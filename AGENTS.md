@@ -76,11 +76,15 @@ docker run --rm --entrypoint ls pi-docker /root/.pi/agent/extensions/  # session
 ```
 pi-docker/
 ├── Dockerfile.pi       # The Dockerfile
-├── .dockerignore       # Build exclusions
-└── AGENTS.md           # This file
+├── .dockerignore       # Build exclusions (submodules excluded)
+├── .gitignore
+├── .gitmodules
+├── AGENTS.md           # This file
+├── inspect/            # Submodule: pi-session-inspector
+└── search-codebase/    # Submodule: sonde
 ```
 
-The `inspect/` and `search-codebase/` directories are local development clones (not used by the Docker build — everything comes from git/npm).
+`inspect/` and `search-codebase/` are git submodules — tracked for reference, excluded from Docker build context (all installs are via `git clone` in the Dockerfile).
 
 ## Adding an extension
 

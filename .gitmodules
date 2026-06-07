@@ -1,0 +1,6 @@
+[submodule "inspect"]
+	path = inspect
+	url = https://github.com/RemyFevry/pi-session-inspector.git
+[submodule "search-codebase"]
+	path = search-codebase
+	url = https://github.com/RemyFevry/sonde.git

@@ -24,7 +24,36 @@ RUN git clone --depth 1 https://github.com/RemyFevry/sonde.git /tmp/sonde \
 RUN rtk init -g --agent pi
 
 # Install Matt Pocock's engineering skills (https://github.com/mattpocock/skills)
-RUN npx skills@latest add mattpocock/skills -g -a pi -s '*' -y --copy
+RUN npx skills@latest add mattpocock/skills -g -a pi \
+    -s '{diagnose,grill-with-docs,improve-codebase-architecture,prototype,setup-matt-pocock-skills,tdd,to-issues,to-prd,triage,zoom-out}' \
+    -y --copy
 
 WORKDIR /workspace
+
+# Verify all components
+RUN set -e \
+  && echo "=== Extensions ===" \
+  && pi list | grep -q pi-subagents && echo "  ✓ pi-subagents" \
+  && pi list | grep -q pi-web-access && echo "  ✓ pi-web-access" \
+  && test -f /root/.pi/agent/extensions/session-inspector/index.ts && echo "  ✓ session-inspector" \
+  && test -f /root/.pi/agent/extensions/rtk.ts && echo "  ✓ rtk" \
+  && echo "=== CLI tools ===" \
+  && sd --help > /dev/null && echo "  ✓ sd" \
+  && rtk --help > /dev/null && echo "  ✓ rtk" \
+  && git --version > /dev/null && echo "  ✓ git" \
+  && rg --version > /dev/null && echo "  ✓ ripgrep" \
+  && rustc --version > /dev/null && echo "  ✓ rustc" \
+  && echo "=== Skills ===" \
+  && test -d /root/.pi/agent/skills/diagnose && echo "  ✓ diagnose" \
+  && test -d /root/.pi/agent/skills/tdd && echo "  ✓ tdd" \
+  && test -d /root/.pi/agent/skills/prototype && echo "  ✓ prototype" \
+  && test -d /root/.pi/agent/skills/to-issues && echo "  ✓ to-issues" \
+  && test -d /root/.pi/agent/skills/to-prd && echo "  ✓ to-prd" \
+  && test -d /root/.pi/agent/skills/triage && echo "  ✓ triage" \
+  && test -d /root/.pi/agent/skills/zoom-out && echo "  ✓ zoom-out" \
+  && test -d /root/.pi/agent/skills/grill-with-docs && echo "  ✓ grill-with-docs" \
+  && test -d /root/.pi/agent/skills/improve-codebase-architecture && echo "  ✓ improve-codebase-architecture" \
+  && test -d /root/.pi/agent/skills/setup-matt-pocock-skills && echo "  ✓ setup-matt-pocock-skills" \
+  && echo "=== All components verified ==="
+
 ENTRYPOINT ["pi"]
